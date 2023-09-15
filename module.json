@@ -3,7 +3,7 @@
   "name": "sch-customize",
   "title": "sch-customize",
   "description": "customizing",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "minimumCoreVersion": "10",
   "compatibleCoreVersion": "11",
   "compatibility": {
@@ -39,8 +39,8 @@
     "./scripts/chat-log.js",
     "./lib/jszip.min.js"
   ],
-  "url": "",
-  "manifest": "",
-  "download": "",
+  "url": "https://github.com/scheree125/sch-customize",
+  "manifest": "https://github.com/scheree125/sch-customize/releases/latest/download/module.json",
+  "download": "https://github.com/scheree125/sch-customize/releases/latest/download/sch-customize.zip",
   "manifestPlusVersion": "1.2.0"
 }
