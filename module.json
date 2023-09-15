@@ -1,0 +1,46 @@
+  {
+  "id": "sch-customize",
+  "name": "sch-customize",
+  "title": "sch-customize",
+  "description": "customizing",
+  "version": "1.0.0",
+  "minimumCoreVersion": "10",
+  "compatibleCoreVersion": "11",
+  "compatibility": {
+    "minimum": "10",
+    "verified": "11"
+  },
+  "author": "Scheree",
+  "authors": [
+    {
+      "name": "Scheree"
+    }
+  ],
+  "packs": [
+    {
+      "name": "macros",
+      "label": "sch-customize",
+      "path": "/packs/macros.db",
+      "entity": "Macro",
+      "type": "Macro"
+    }
+  ],
+  "styles": ["styles/priv_talk.css"],
+  "relationships": {
+    "requires": [{
+      "id": "_chatcommands",
+      "type": "module",
+      "manifest": "https://gitlab.com/woodentavern/foundryvtt-chat-command-lib/-/raw/master/src/module.json",
+      "compatibility": { "verified": "2.0.1" }
+    }]
+  },
+  "scripts": [
+    "./scripts/init.js",
+    "./scripts/chat-log.js",
+    "./lib/jszip.min.js"
+  ],
+  "url": "",
+  "manifest": "",
+  "download": "",
+  "manifestPlusVersion": "1.2.0"
+}

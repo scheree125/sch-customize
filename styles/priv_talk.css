@@ -1,0 +1,16 @@
+.priv_talk {
+  border: none;
+  color: grey;
+  padding: 5px;
+  font-size: smaller;
+  margin-left: 10px;
+}
+.priv_user {
+  font-weight: bold;
+}
+
+.priv_talk.line-change .message-content {
+  display: grid;
+  grid-template-columns: 2fr 5fr;
+}
+
