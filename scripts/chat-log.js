@@ -24,9 +24,6 @@ async function downloadArchiveFile(chats) {
       });
 }
 
-
-
-
 async function generateHtmlFromChats(chats) {
   const response = await fetch('modules/sch-customize/template/chat-archive-template.html');
   const templateHtml = await response.text();
@@ -35,11 +32,12 @@ async function generateHtmlFromChats(chats) {
   const doc = parser.parseFromString(templateHtml, 'text/html');
 
   const container = doc.querySelector('.foundry-chat-container');
+  let prevPtFlag;
   let prevSpeaker;
   for (const chat of chats) {
-    const chatMergeFlag = prevSpeaker === chat.speaker.alias;
-    appendChatContents(chat, chatMergeFlag, container);
-    prevSpeaker = chat.speaker.alias;
+    const chatMergeFlag = prevSpeaker === chat.alias;
+    prevPtFlag = appendChatContents(chat, chatMergeFlag, prevPtFlag, container);
+    prevSpeaker = chat.alias;
   }
 
   //일회성 처리
@@ -75,13 +73,15 @@ async function generateHtmlFromChats(chats) {
   return [doc.documentElement.outerHTML, contentImg, portraitImg];
 }
 
-function appendChatContents(chat, chatMergeFlag, container) {
+function appendChatContents(chat, chatMergeFlag, prevPtFlag, container) {
   const {type, rolls, flags, user } = chat;
-  const speaker = chat.speaker.alias;
+  const speaker = chat.alias;
 
   const text = type === 5 && rolls.length > 0 ? getRollResultContent(chat) : chat.content;
   const imageUrl = getChatImageUrl(chat);
-  const privTalkFlag = flags?.priv_talk;
+  const privTalkFlag = flags?.priv_talk ? flags.priv_talk : false;
+  if(prevPtFlag !== privTalkFlag)
+    chatMergeFlag = false;
 
   const div = createDivWithClasses(['chat-box', privTalkFlag ? 'priv-talk' : null, user ? `user-${typeof user === 'string'? user : user._id}` : null]);
 
@@ -95,6 +95,7 @@ function appendChatContents(chat, chatMergeFlag, container) {
   const textDiv = createDivWithClasses(textDivClasses, text, true);
   appendChildren(div, [imageDiv, nameDiv, textDiv]);
   container.appendChild(div);
+  return !!privTalkFlag;
 }
 
 function createDivWithClasses(classes, content, isHtml) {
@@ -140,13 +141,20 @@ function createCssList(selectors) {
 
   for (let i = 0; i < document.styleSheets.length; i++) {
     const styleSheet = document.styleSheets[i];
-    for (let j = 0; j < styleSheet.cssRules.length; j++) {
-      const rule = styleSheet.cssRules[j];
-      if (rule.type === CSSRule.STYLE_RULE) {
-        const selectorText = rule.selectorText;
-        const styleText = rule.style.cssText;
-        styleSheetObject[selectorText] = styleText;
+    try {
+      const cssRules = document.styleSheets[i].cssRules;
+      if (cssRules) {
+        for (let j = 0; j < styleSheet.cssRules.length; j++) {
+          const rule = styleSheet.cssRules[j];
+          if (rule.type === CSSRule.STYLE_RULE) {
+            const selectorText = rule.selectorText;
+            const styleText = rule.style.cssText;
+            styleSheetObject[selectorText] = styleText;
+          }
+        }
       }
+    } catch (error) {
+      console.warn(`cssRules에 접근할 수 없는 스타일시트가 발견되었습니다: ${error.message}`);
     }
   }
   const matchingStyles = [];
@@ -306,8 +314,9 @@ async function getDFchatArchive(filepath) {
   try {
     const response = await fetch(filepath);
     if (response.ok) {
-      const data = await response.json();
-      await downloadArchiveFile(data);
+      const jsonDataArray = await response.json();
+      const chats = await jsonDataArray.map(data => new ChatMessage(data));
+      await downloadArchiveFile(chats);
     } else {
       throw new Error('Could not access the archive from server side: ' + filepath);
     }
@@ -315,6 +324,6 @@ async function getDFchatArchive(filepath) {
     console.error(`Failed to read JSON for archive ${filepath}\n${error}`);
     throw error;
   } finally {
-   game.settings.set("sch-customize", "convertDFchatArchive", "");
+    game.settings.set("sch-customize", "convertDFchatArchive", "");
   }
 }
