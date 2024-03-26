@@ -37,9 +37,9 @@ async function generateHtmlFromChats(chats) {
   const container = doc.querySelector('.foundry-chat-container');
   let prevSpeaker;
   for (const chat of chats) {
-    const chatMergeFlag = prevSpeaker === chat.speaker.alias;
+    const chatMergeFlag = prevSpeaker === getSpeaker(chat);
     appendChatContents(chat, chatMergeFlag, container);
-    prevSpeaker = chat.speaker.alias;
+    prevSpeaker = getSpeaker(chat);
   }
 
   //일회성 처리
@@ -77,7 +77,7 @@ async function generateHtmlFromChats(chats) {
 
 function appendChatContents(chat, chatMergeFlag, container) {
   const {type, rolls, flags, user } = chat;
-  const speaker = chat.speaker.alias;
+  const speaker = getSpeaker(chat);
 
   const text = type === 5 && rolls.length > 0 ? getRollResultContent(chat) : chat.content;
   const imageUrl = getChatImageUrl(chat);
@@ -140,13 +140,20 @@ function createCssList(selectors) {
 
   for (let i = 0; i < document.styleSheets.length; i++) {
     const styleSheet = document.styleSheets[i];
-    for (let j = 0; j < styleSheet.cssRules.length; j++) {
-      const rule = styleSheet.cssRules[j];
-      if (rule.type === CSSRule.STYLE_RULE) {
-        const selectorText = rule.selectorText;
-        const styleText = rule.style.cssText;
-        styleSheetObject[selectorText] = styleText;
+    try {
+      const cssRules = document.styleSheets[i].cssRules;
+      if (cssRules) {
+        for (let j = 0; j < styleSheet.cssRules.length; j++) {
+          const rule = styleSheet.cssRules[j];
+          if (rule.type === CSSRule.STYLE_RULE) {
+            const selectorText = rule.selectorText;
+            const styleText = rule.style.cssText;
+            styleSheetObject[selectorText] = styleText;
+          }
+        }
       }
+    } catch (error) {
+      console.warn(`cssRules에 접근할 수 없는 스타일시트가 발견되었습니다: ${error.message}`);
     }
   }
   const matchingStyles = [];
@@ -269,6 +276,16 @@ function cleanImageFilename(filename) {
     }
   }
   return filename;
+}
+
+function getSpeaker(chat) {
+  if (chat.speaker.alias) {
+    return chat.speaker.alias;
+  }
+  if (chat.type === CONST.CHAT_MESSAGE_TYPES.OOC) {
+    return chat.user.name;
+  }
+  return 'Unknown';
 }
 
 class DownloadChatArchive extends FormApplication {
