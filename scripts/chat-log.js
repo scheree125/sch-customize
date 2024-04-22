@@ -35,8 +35,12 @@ async function generateHtmlFromChats(chats) {
   let prevPtFlag;
   let prevSpeaker;
   for (const chat of chats) {
+    let whisperFlag = chat?.whisper.length > 0 ;
+    if(whisperFlag && !game.settings.get("sch-customize", "includeWhisper")) {
+        continue;
+      }
     const chatMergeFlag = prevSpeaker === chat.alias;
-    prevPtFlag = appendChatContents(chat, chatMergeFlag, prevPtFlag, container);
+    prevPtFlag = appendChatContents(chat, chatMergeFlag, prevPtFlag, whisperFlag, container);
     prevSpeaker = chat.alias;
   }
 
@@ -73,7 +77,7 @@ async function generateHtmlFromChats(chats) {
   return [doc.documentElement.outerHTML, contentImg, portraitImg];
 }
 
-function appendChatContents(chat, chatMergeFlag, prevPtFlag, container) {
+function appendChatContents(chat, chatMergeFlag, prevPtFlag, whisperFlag, container) {
   const {type, rolls, flags, user } = chat;
   const speaker = chat.alias;
 
@@ -83,7 +87,10 @@ function appendChatContents(chat, chatMergeFlag, prevPtFlag, container) {
   if(prevPtFlag !== privTalkFlag)
     chatMergeFlag = false;
 
-  const div = createDivWithClasses(['chat-box', privTalkFlag ? 'priv-talk' : null, user ? `user-${typeof user === 'string'? user : user._id}` : null]);
+  const div = createDivWithClasses(['chat-box',
+    privTalkFlag ? 'priv-talk' : null, whisperFlag ? 'whisper': null,
+    whisperFlag && game.settings.get("sch-customize", "hideWhisper") ? 'whisper-hidden' : null,
+    user ? `user-${typeof user === 'string'? user : user._id}` : null]);
 
   const nameDiv = createDivWithClasses('chat-name', !chatMergeFlag ? [speaker] : null);
   const imageDiv = createDivWithClasses('chat-image');
@@ -99,11 +106,16 @@ function appendChatContents(chat, chatMergeFlag, prevPtFlag, container) {
 }
 
 function createDivWithClasses(classes, content, isHtml) {
+
   const div = document.createElement('div');
   (Array.isArray(classes) ? classes : [classes]).forEach(cls => cls && div.classList.add(cls));
 
   if (isHtml) {
+    const container = document.createElement('div');
+    container.classList.add("container");
+    container.appendChild(div);
     div.innerHTML = content;
+    return container;
   } else if (content) {
     div.textContent = content;
   }

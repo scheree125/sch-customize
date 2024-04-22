@@ -5,7 +5,7 @@ Hooks.once("setup", function () {
       html.addClass('priv_talk');
       html.find('header').css("display","none");
       html.find('.message-content').prepend(`<div class="priv_user">${message.speaker.alias}</div> `);
-      if (game.settings.get("sch-customize", "speaker-line-change"))
+      if (!game.settings.get("sch-customize", "privTalkSpeakerLineChange"))
         html.addClass('line-change');
     }
   });
@@ -22,6 +22,8 @@ Hooks.once("setup", function () {
           type: "character"
         });
       }
+      if (!game.settings.get("sch-customize", "markdownDelUse"))
+        parameters = parameters.replace(/<\s*\/?\s*del\s*>/g, '~');
       messageData.speaker.actor = game.actors.getName("잡담").id;
       messageData.speaker.token = null;
 
@@ -50,12 +52,40 @@ Hooks.once('init', () => {
     onChange: _ => window.location.reload()
   });
 
+  game.settings.register("sch-customize", "markdownDelUse", {
+    name: "채팅에 마크다운 사용 시 취소선 적용 여부",
+    hint: "채팅에 마크다운을 적용 시 ~ 사이에 감싸인 문자를 취소선으로 표시합니다.",
+    scope: "world",
+    config: true,
+    default: false,
+    type: Boolean,
+    onChange: _ => window.location.reload()
+  });
+
   game.settings.registerMenu("sch-customize", "downloadChatArchiveMenu", {
     name: `채팅 로그 다운로드`,
     hint: `html형식의 채팅 로그와 이미지 파일을 다운로드 합니다.`,
-    icon: "fas fa-coins",
+    icon: "fas fa-download",
     type: DownloadChatArchive,
     restricted: true,
+  });
+
+  game.settings.register("sch-customize", "includeWhisper", {
+    name: "채팅 로그 귓속말을 포함",
+    hint: "채팅 로그에 모든 유저의 귓속말을 포함합니다.",
+    scope: "world",
+    config: true,
+    default: false,
+    type: Boolean,
+  });
+
+  game.settings.register("sch-customize", "hideWhisper", {
+    name: "채팅로그 귓속말 숨김",
+    hint: "채팅 로그의 귓속말을 가립니다. 회색 배경으로 표시되며 클릭 시 텍스트가 표시됩니다.",
+    scope: "world",
+    config: true,
+    default: false,
+    type: Boolean,
   });
 
   game.settings.register("sch-customize", "convertDFchatArchive", {
