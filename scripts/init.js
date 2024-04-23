@@ -66,13 +66,18 @@ Hooks.once('init', () => {
     name: `채팅 로그 다운로드`,
     hint: `html형식의 채팅 로그와 이미지 파일을 다운로드 합니다.`,
     icon: "fas fa-download",
-    type: DownloadChatArchive,
-    restricted: true,
+    type: DownloadChatArchive
   });
 
+  game.settings.registerMenu("sch-customize", "openChatArchiveWindow", {
+    name: `채팅 로그 표시`,
+    hint: `현재까지의 채팅 로그를 새 창에 표시합니다.`,
+    icon: "fas fa-arrow-up-right-from-square",
+    type: openChatArchiveWindow
+  });
   game.settings.register("sch-customize", "includeWhisper", {
     name: "채팅 로그 귓속말을 포함",
-    hint: "채팅 로그에 모든 유저의 귓속말을 포함합니다.",
+    hint: "채팅 로그에 귓속말을 포함합니다.",
     scope: "world",
     config: true,
     default: false,

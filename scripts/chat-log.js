@@ -24,6 +24,69 @@ async function downloadArchiveFile(chats) {
       });
 }
 
+async function openChatArchive(chats){
+  let [htmlContent] = await generateSimpleHtmlFromChats(chats);
+  let newWindow =window.open("", "_blank");
+  newWindow.document.open();
+  newWindow.document.write(htmlContent);
+  newWindow.document.close();
+}
+async function generateSimpleHtmlFromChats(chats){
+
+  const response = await fetch('modules/sch-customize/template/chat-archive-template.html');
+  const templateHtml = await response.text();
+
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(templateHtml, 'text/html');
+
+  const container = doc.querySelector('.foundry-chat-container');
+  let prevPtFlag;
+  let prevSpeaker;
+  const includeWhisperFlag = game.settings.get("sch-customize", "includeWhisper");
+  for (const chat of chats) {
+    let whisperFlag = chat?.type === CONST.CHAT_MESSAGE_TYPES.WHISPER;
+    if(whisperFlag){
+      if(!includeWhisperFlag || !chat.isContentVisible)
+        continue;
+    }
+    const chatMergeFlag = prevSpeaker === chat.alias;
+    prevPtFlag = appendChatContents(chat, chatMergeFlag, prevPtFlag, whisperFlag, container);
+    prevSpeaker = chat.alias;
+  }
+
+  //일회성 처리
+  const inlineRollLinks = doc.querySelectorAll('a.inline-roll.inline-result');
+  inlineRollLinks.forEach((link) => {
+    const newDiv = doc.createElement('div');
+    newDiv.className = 'inline-roll';
+    newDiv.textContent = link.dataset.tooltip + '=>' + link.textContent;
+    link.parentNode.insertBefore(newDiv, link.nextSibling);
+    link.remove();
+  });
+/*
+
+  let contentImg = new Set([...doc.querySelectorAll('.chat-text img')]
+      .map(img => img.src ? img.src :
+          window.location.href.replace('game', '') + img?.getAttribute('src')));
+
+  let portraitImg = new Set([...doc.querySelectorAll('.chat-image img')]
+      .map(img => img.src ? img.src :
+          window.location.href.replace('game', '') + img?.getAttribute('src')));
+
+*/
+
+  //css 추가
+  const selectors = getSelectors(doc);
+  const styleElement = doc.createElement('style');
+  styleElement.type = 'text/css';
+  styleElement.appendChild(doc.createTextNode(createCssList(selectors)));
+
+  const headElement = doc.head || doc.getElementsByTagName('head')[0];
+  headElement.appendChild(styleElement);
+
+
+  return [doc.documentElement.outerHTML];
+}
 async function generateHtmlFromChats(chats) {
   const response = await fetch('modules/sch-customize/template/chat-archive-template.html');
   const templateHtml = await response.text();
@@ -34,11 +97,13 @@ async function generateHtmlFromChats(chats) {
   const container = doc.querySelector('.foundry-chat-container');
   let prevPtFlag;
   let prevSpeaker;
+  const includeWhisperFlag = game.settings.get("sch-customize", "includeWhisper");
   for (const chat of chats) {
-    let whisperFlag = chat?.whisper.length > 0 ;
-    if(whisperFlag && !game.settings.get("sch-customize", "includeWhisper")) {
+    let whisperFlag = chat?.type === CONST.CHAT_MESSAGE_TYPES.WHISPER;
+    if(whisperFlag){
+      if(!includeWhisperFlag || !chat.isContentVisible)
         continue;
-      }
+    }
     const chatMergeFlag = prevSpeaker === chat.alias;
     prevPtFlag = appendChatContents(chat, chatMergeFlag, prevPtFlag, whisperFlag, container);
     prevSpeaker = chat.alias;
@@ -79,7 +144,7 @@ async function generateHtmlFromChats(chats) {
 
 function appendChatContents(chat, chatMergeFlag, prevPtFlag, whisperFlag, container) {
   const {type, rolls, flags, user } = chat;
-  const speaker = chat.alias;
+  let speaker = chat.alias;
 
   const text = type === 5 && rolls.length > 0 ? getRollResultContent(chat) : chat.content;
   const imageUrl = getChatImageUrl(chat);
@@ -91,6 +156,13 @@ function appendChatContents(chat, chatMergeFlag, prevPtFlag, whisperFlag, contai
     privTalkFlag ? 'priv-talk' : null, whisperFlag ? 'whisper': null,
     whisperFlag && game.settings.get("sch-customize", "hideWhisper") ? 'whisper-hidden' : null,
     user ? `user-${typeof user === 'string'? user : user._id}` : null]);
+
+  if(whisperFlag){
+    chatMergeFlag = false;
+    let whisperTo = [];
+    chat.whisper.forEach(i => whisperTo.push(game.users.get(i).name));
+    speaker = `${chat.alias}\n→[${whisperTo}]`
+  }
 
   const nameDiv = createDivWithClasses('chat-name', !chatMergeFlag ? [speaker] : null);
   const imageDiv = createDivWithClasses('chat-image');
@@ -306,6 +378,37 @@ class DownloadChatArchive extends FormApplication {
           callback: async () => {
             const chats = [...(ui.chat.collection.values())];
             await downloadArchiveFile(chats);
+          },
+        },
+        cancel: {
+          icon: '<i class="fas fa-times"></i>',
+          label: `취소`,
+        },
+      },
+      default: "cancel",
+    });
+  }
+  getData() {
+  }
+  async _updateObject(event, formData) {
+  }
+}
+
+
+class openChatArchiveWindow extends FormApplication {
+  constructor() {
+    super();
+    return new Dialog({
+      title: `채팅 로그 표시`,
+      content:
+          `채팅 로그를 새 창에 표시합니다.`,
+      buttons: {
+        confirm: {
+          icon: '<i class="fas fa-check"></i>',
+          label: `열기`,
+          callback: async () => {
+            const chats = [...(ui.chat.collection.values())];
+            await openChatArchive(chats);
           },
         },
         cancel: {

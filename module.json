@@ -3,7 +3,7 @@
   "name": "sch-customize",
   "title": "sch-customize",
   "description": "customizing",
-  "version": "1.0.1",
+  "version": "1.0.3",
   "minimumCoreVersion": "10",
   "compatibleCoreVersion": "11",
   "compatibility": {
