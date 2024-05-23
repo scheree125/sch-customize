@@ -78,7 +78,7 @@ Hooks.once('init', () => {
   });
 
   game.settings.register("sch-customize", "hideWhisper", {
-    name: "채팅로그 귓속말 숨김",
+    name: "채팅 로그 귓속말 숨김",
     hint: "채팅 로그의 귓속말을 가립니다. 회색 배경으로 표시되며 클릭 시 텍스트가 표시됩니다.",
     scope: "client",
     config: true,
@@ -103,7 +103,7 @@ Hooks.once('init', () => {
 
   game.settings.register("sch-customize", "customPrivTalkAlias", {
     name: "잡담 시작을 위한 문자 지정",
-    hint: "잡담으로 발언할 때 처음으로 타이핑 하는 커스텀 문자 등록. 기본은 '/pt', '!', '`'로 사용가능합니다.",
+    hint: "잡담으로 발언할 때 처음으로 타이핑 하는 커스텀 문자를 등록합니다. 입력한 문자는 다른 모듈과 중복, 마크다운 옵션 등의 이유로 사용이 불가능 할 수 있습니다. 기본 옵션인 '/pt', '!', '`'는 유지됩니다.",
     scope: "client",
     config: true,
     default: "/p",
@@ -113,8 +113,8 @@ Hooks.once('init', () => {
 
 
   game.settings.register("sch-customize", "markdownDelUse", {
-    name: "채팅에 마크다운 사용 시 취소선 적용 여부",
-    hint: "채팅에 마크다운을 적용 시 ~ 사이에 감싸인 문자를 취소선으로 표시합니다.",
+    name: "잡담에 마크다운 취소선 적용 여부",
+    hint: "채팅에 마크다운을 적용 시, 잡담 중 ~로 감싸인 문자를 취소선으로 표시합니다.",
     scope: "client",
     config: true,
     default: false,
@@ -124,7 +124,7 @@ Hooks.once('init', () => {
 
   game.settings.register("sch-customize", "privTalkAsOOC", {
     name: "잡담을 OOC로 생성",
-    hint: "이후 생성되는 OOC로 분류됩니다. 기본은 기타(Other)입니다.",
+    hint: "이후 생성되는 잡담은 OOC로 분류됩니다. 기본은 기타(Other)입니다.",
     scope: "world",
     config: true,
     default: false,
@@ -132,8 +132,8 @@ Hooks.once('init', () => {
   });
 
   game.settings.register("sch-customize", "privTalkSpeakerLineChange", {
-    name: "이름 뒤 줄바꿈",
-    hint: "플레이어 닉네임 표시 후 줄바꿈 후 잡담 내용을 표시합니다.",
+    name: "잡담 이름 표기 후 줄바꿈",
+    hint: "잡담에서 플레이어 닉네임 표시 후 줄바꿈하고 메세지 내용을 표시합니다.",
     scope: "client",
     config: true,
     default: false,
@@ -158,8 +158,8 @@ Hooks.once('init', () => {
 
 
   game.settings.register("sch-customize", "setPrivTalkFontSize", {
-    name: '사담 글자 크기',
-    hint: '사담 글자 크기 조절(기본 12px)',
+    name: '잡담 글자 크기',
+    hint: '잡담 글자 크기를 조절합니다.(기본 12px)',
     config: true,
     type: Number,
     scope: 'client',
@@ -173,8 +173,8 @@ Hooks.once('init', () => {
   });
 
   game.settings.register("sch-customize", "setPrivTalkFontOpacity", {
-    name: '사담 글자 색상',
-    hint: '사담 글자 진하기 조절(기본 0.8)',
+    name: '잡담 글자 색상',
+    hint: '잡담 글자 색상인 검정색의 진하기를 조절합니다.(기본 0.8)',
     config: true,
     type: Number,
     scope: 'client',
@@ -188,8 +188,8 @@ Hooks.once('init', () => {
   });
 
   game.settings.register("sch-customize", "setPrivTalkMarginLeft", {
-    name: '사담 여백 간격',
-    hint: '사담 여백 간격 조절(기본 10)',
+    name: '잡담 여백 간격',
+    hint: '잡담 왼쪽으로 생기는 여백 간격을 조절합니다.(기본 10)',
     config: true,
     type: Number,
     scope: 'client',
@@ -203,8 +203,8 @@ Hooks.once('init', () => {
   });
 
   game.settings.register("sch-customize", "setPrivTalkBgBrightness", {
-    name: '사담 밝기 조절',
-    hint: '사담 배경색을 밝게(기본:0.1)',
+    name: '잡담 밝기 조절',
+    hint: '잡담 배경색(유저 색상과 동일)을 밝게 표시합니다. 채팅의 배경색을 지정하는 다른 모듈의 옵션을 적용할 경우 알맞게 조절이 필요합니다.(기본 0.7)',
     config: true,
     type: Number,
     scope: 'client',
@@ -213,7 +213,7 @@ Hooks.once('init', () => {
       max: 1,
       step: 0.05
     },
-    default: 0.1,
+    default: 0.7,
     onChange: (value) => this.updateCssProperty('brightness', `${value}`)
   });
 

@@ -298,7 +298,8 @@ function getRollResultContent(chat){
   const rolls = typeof chat.rolls[0] === 'string' ? JSON.parse(chat.rolls[0]) : chat.rolls[0] ;
   const dieResults = rolls.terms.filter(term => term.results);
   const flavor = chat.flavor;
-  let content= `<div class="roll-dice">
+  let content= chat?.content;
+  content += `<div class="roll-dice">
               <div class="flavor">${flavor}</div>
               <strong>${rolls.formula}</strong>: (`;
   for(const die of dieResults){

@@ -3,11 +3,11 @@
   "name": "sch-customize",
   "title": "sch-customize",
   "description": "customizing",
-  "version": "1.0.3",
-  "minimumCoreVersion": "10",
+  "version": "1.0.4",
+  "minimumCoreVersion": "11",
   "compatibleCoreVersion": "11",
   "compatibility": {
-    "minimum": "10",
+    "minimum": "11",
     "verified": "11"
   },
   "author": "Scheree",
