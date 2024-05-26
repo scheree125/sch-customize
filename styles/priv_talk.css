@@ -8,7 +8,6 @@
 
 li.chat-message.message.flexcol.priv_talk {
   border: none;
-  overflow: hidden;
   margin-left: var(--priv-talk-margin-left);
   padding: 5px;
   position: relative;
@@ -43,6 +42,7 @@ li.chat-message.message.flexcol > div.message-content {
 li.chat-message.message.flexcol.priv_talk > div.message-content {
   color: var(--priv-talk-font-color);
   font-size: var(--priv-talk-font-size);
+  padding: 0;
 }
 
 .priv_user {

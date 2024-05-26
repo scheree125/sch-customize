@@ -148,7 +148,7 @@ function appendChatContents(chat, chatMergeFlag, prevPtFlag, whisperFlag, contai
 
   const text = type === 5 && rolls.length > 0 ? getRollResultContent(chat) : chat.content;
   const imageUrl = getChatImageUrl(chat);
-  const privTalkFlag = flags?.priv_talk ? flags.priv_talk : false;
+  const privTalkFlag = flags?.priv_talk || chat.getFlag('sch-customize', 'priv_talk') || false;
   if(prevPtFlag !== privTalkFlag)
     chatMergeFlag = false;
 

@@ -1,19 +1,11 @@
+let lastPrivTalkMsg;
+let privTalkIndex = 0;
+
 Hooks.once("setup", function () {
   const commands = game.chatCommands;
-  Hooks.on("renderChatMessage", (message, html, messageData) => {
-    const privFlag = message.flags.priv_talk || message.getFlag('sch-customize', 'priv_talk');
-    if(privFlag){
-      html.addClass('priv_talk');
-      html.addClass(`user-${message.user.id}`);
-      if(typeof privFlag === 'string')
-        html.addClass(privFlag);
-      html.find('header').css("display","none");
-      html.find('.message-content').html(`<div class="pt priv_user">${message.speaker.alias}</div> <div class="pt">${message.content}</div>`);
-      if (!game.settings.get("sch-customize", "privTalkSpeakerLineChange"))
-        html.addClass('line-change');
-    }
-  });
 
+  lastPrivTalkMsg = null;
+  privTalkIndex = 0;
   commands.register({
     name: "/pt",
     module: "core",
@@ -29,22 +21,12 @@ Hooks.once("setup", function () {
       messageData.speaker.token = null;
       messageData.speaker.alias = speakUser.name;
       messageData.type = game.settings.get("sch-customize", "privTalkAsOOC") ? CONST.CHAT_MESSAGE_TYPES.OOC : CONST.CHAT_MESSAGE_TYPES.OTHER;
-      const lastMsg = game.messages.contents[game.messages.size - 1];
-      const lastMgsPrivFlags = lastMsg.getFlag('sch-customize', 'priv_talk');
-      let position = true;
-      if(lastMgsPrivFlags === true) {
-        await game.messages.get(lastMsg.id).setFlag('sch-customize', 'priv_talk', 'top');
-        position = 'end';
-      }else if(lastMgsPrivFlags === 'end'){
-        await game.messages.get(lastMsg.id).setFlag('sch-customize', 'priv_talk', 'middle');
-        position = 'end';
-      }
 
       return {
         content: parameters,
         flags: {
           'sch-customize':
-              {'priv_talk': position}
+              {'priv_talk': true}
         }
       }
     },
@@ -52,6 +34,38 @@ Hooks.once("setup", function () {
     closeOnComplete: true
   });
 });
+
+
+Hooks.on("renderChatMessage", (message, html, messageData) => {
+  const privFlag = message.flags.priv_talk || message.getFlag('sch-customize', 'priv_talk');
+  if (privFlag) {
+    html.addClass('priv_talk');
+    html.addClass(`user-${message.user.id}`);
+    if(privTalkIndex > 0){
+      if(lastPrivTalkMsg) {
+        const prevHtml = lastPrivTalkMsg;
+        if (prevHtml.hasClass('end')){
+          prevHtml.removeClass('end');
+          prevHtml.addClass('middle');
+          html.addClass('end');
+        } else{
+          prevHtml.addClass('top');
+          html.addClass('end');
+        }
+      }
+    }
+    privTalkIndex++;
+    lastPrivTalkMsg = html;
+    html.find('header').css("display", "none");
+    html.find('.message-content').html(`<div class="pt priv_user">${message.speaker.alias}</div> <div class="pt">${message.content}</div>`);
+    if (!game.settings.get("sch-customize", "privTalkSpeakerLineChange"))
+      html.addClass('line-change');
+  }
+  else{
+    privTalkIndex = 0;
+  }
+});
+
 
 Hooks.once('init', () => {
 
