@@ -200,12 +200,12 @@ function appendChildren(parent, children) {
 }
 
 function getChatImageUrl(chat) {
-  if (chat.flags['chat-portrait']) {
-    //return window.location.href.replace('game', '') + chat.flags['chat-portrait'].src;
-    return chat.flags['chat-portrait'].src;
-  } else if (game.actors.get(chat.speaker?.actor)?.img) {
-    //return window.location.href.replace('game', '') + game.actors.get(chat.speaker?.actor).img;
+  if (game.actors.get(chat.speaker?.actor)?.img) {
     return game.actors.get(chat.speaker?.actor).img;
+  } else if (game.actors.getName(chat.speaker.alias)?.img){
+    return game.actors.getName(chat.speaker.alias)?.img;
+  } else if (chat.flags['chat-portrait']) {
+    return chat.flags['chat-portrait'].src;
   }
   return null;
 }
